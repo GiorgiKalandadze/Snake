@@ -1,0 +1,24 @@
+*{
+    box-sizing: border-box;
+    margin: 0px;
+    padding: 0px;
+}
+
+.board{
+    width: 500px;
+    height: 500px;
+    background-color: black;
+    border: 1px solid white;
+    margin:auto;
+    margin-top: 50px;
+    
+}
+
+
+.cell{
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background-color: green;
+    border: 1px solid black;
+}
