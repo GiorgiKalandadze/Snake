@@ -1,16 +1,11 @@
 document.addEventListener("keydown", (e)=>{
-    console.log(e.key);
-    if(e.key === 'ArrowUp'){
-        direction = 'Up';
-   
-    } else if(e.key === 'ArrowRight'){
-        direction = 'Right';
-        // move('Right', 10);
-    } else if(e.key === 'ArrowDown'){
-        direction = 'Down';
-        // move('Down', 10);
-    } else if(e.key === 'ArrowLeft'){
-        direction = 'Left';
-        // move('Left', 10);
-    } 
+    if(e.key === 'ArrowUp' && game.snake.direction != 'Down'){
+        game.snake.direction = 'Up';
+    } else if(e.key === 'ArrowRight' && game.snake.direction != 'Left'){
+        game.snake.direction = 'Right';
+    } else if(e.key === 'ArrowDown' && game.snake.direction != 'Up'){       
+        game.snake.direction = 'Down';
+    } else if(e.key === 'ArrowLeft' && game.snake.direction != 'Right'){
+        game.snake.direction = 'Left';
+    }   
 });

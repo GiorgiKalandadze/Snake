@@ -22,3 +22,6 @@
     background-color: green;
     border: 1px solid black;
 }
+.cell:first-child{
+    background-color: blue;
+}
