@@ -9,3 +9,5 @@ document.addEventListener("keydown", (e)=>{
         game.snake.direction = 'Left';
     }   
 });
+
+

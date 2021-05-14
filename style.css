@@ -5,11 +5,11 @@
 }
 
 .board{
-    width: 500px;
-    height: 500px;
+    width: 600px;
+    height: 600px;
     background-color: black;
-    margin:auto;
-    margin-top: 50px;   
+    margin-top: 40px;
+    margin-left: 400px;   
 }
 .cell{
     position: absolute;
@@ -17,7 +17,13 @@
     height: 20px;
     background-color: green;
     border: 1px solid black;
-    
+}
+.food{
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background-color: red;
+    border: 1px solid black;
 }
 .cell:first-child{
     background-color: blue;

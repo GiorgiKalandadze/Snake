@@ -9,6 +9,7 @@ class Config{
         this.snake_x = config.snake_x;
         this.snake_y = config.snake_y;
         this.start_direction = config.start_direction;
+        this.speed = config.speed;
     }
 } 
 
@@ -74,14 +75,27 @@ class Snake{
     getHead(){
         return this.body[0];
     }
+    getCell(index){
+        return this.body[index];
+    }
 }
 
 
 class Game extends Config{
+    
     constructor(config){
         super(config);
         this.snake = new Snake(this.snake_x, this.snake_y, this.cell_size, this.snake_start_length, this.start_direction);
-        this.drawSnake();        
+        let start_x = this.board_x;
+        let end_x = this.board_width;
+        let start_y = this.board_y;
+        let end_y = this.board_height;
+        let x = Math.floor(Math.random() * (end_x - start_x + 1) + start_x);
+        let y = Math.floor(Math.random() * (end_y - start_y + 1) + start_y);
+        
+        this.food = new Cell('Food', this.cell_size, x, y);
+        this.drawSnake();     
+        this.drawFood();   
     }
     drawSnake(){
         document.querySelector('.board').innerHTML = '';
@@ -94,6 +108,13 @@ class Game extends Config{
             div.style.top = cell.y + "px";
             document.querySelector('.board').appendChild(div);
         }  
+    }
+    drawFood(){
+        let div = document.createElement('div');
+        div.className = 'food';
+        div.style.left = this.food.getX() + "px";
+        div.style.top = this.food.getY() + "px";
+        document.querySelector('.container').appendChild(div);
     }
     moveSnake(){
         //Move Part
@@ -118,6 +139,11 @@ class Game extends Config{
         }
     }
     checkBounds(){
+        this.checkWalls();
+        this.checkCollision();
+        
+    }
+    checkWalls(){
         let head = this.snake.getHead();
         if(head.getY() < this.board_y){ //Top
             head.setY(this.board_y + this.board_height - head.getSize());
@@ -129,8 +155,37 @@ class Game extends Config{
             head.setX(this.board_x + this.board_width - head.getSize());
         }
     }
+    checkCollision(){
+        let head = this.snake.getHead();
+        let cell;
+        // console.log('Head - ',head.getX(), head.getY());
+        for(let i = this.snake.getLength() - 1; i > 0; i--){
+            cell = this.snake.getCell(i);
+           // console.log('Cell ', cell.getX(), cell.getY());
+            
+            if(head.getX() === cell.getX() && head.getY() === cell.getY()){
+                console.log('Collision');
+                this.finishRound(); 
+            }
+        }
+    }   
+    finishRound(){
+        
+        clearInterval(this.interval);
+        alert('End');
+        document.querySelector('.board').innerHTML = '';
+        console.log(document.querySelector('.board').innerHTML);
 
-    runGame(){
+        
+        document.querySelector('.board').style.backgroundColor = 'white';
+        
+        
+        
+    }
+    start(){
+        this.interval = setInterval(this.runRound.bind(this), this.speed);
+    }
+    runRound(){
         this.moveSnake(); 
         this.checkBounds();
         this.drawSnake();
@@ -141,15 +196,18 @@ let config =
 {
     board_x: document.querySelector('.board').offsetLeft,
     board_y: document.querySelector('.board').offsetTop,
-    board_width: 500,
-    board_height: 500,
+    board_width: 600,
+    board_height: 600,
     cell_size: 20, 
-    snake_start_length: 4, 
+    snake_start_length:4, 
     snake_x: document.querySelector('.board').offsetLeft + 3 * 20, 
     snake_y: document.querySelector('.board').offsetTop, 
-    start_direction: 'Right' 
+    start_direction: 'Right',
+    speed: 200
 }
 
 let game = new Game(config);
 //Need bind, otherwise 'this' in runGame is 'window' instead of 'Game
-setInterval(game.runGame.bind(game), 100);
+// var interval = setInterval(game.runGame.bind(game), 500);
+game.start();
+
