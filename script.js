@@ -9,7 +9,7 @@ class Config{
         this.snake_x = config.snake_x;
         this.snake_y = config.snake_y;
         this.start_direction = config.start_direction;
-        this.speed = config.speed;
+        this.speed = config.speed;   
     }
 } 
 
@@ -75,28 +75,29 @@ class Snake{
     getHead(){
         return this.body[0];
     }
+    getBack(){
+        return this.body[this.body_length - 1];
+    }
     getCell(index){
         return this.body[index];
+    }
+    grow(cell){
+        this.body.push(cell);
+        this.body_length += 1;
     }
 }
 
 
 class Game extends Config{
-    
     constructor(config){
         super(config);
         this.snake = new Snake(this.snake_x, this.snake_y, this.cell_size, this.snake_start_length, this.start_direction);
-        let start_x = this.board_x;
-        let end_x = this.board_width;
-        let start_y = this.board_y;
-        let end_y = this.board_height;
-        let x = Math.floor(Math.random() * (end_x - start_x + 1) + start_x);
-        let y = Math.floor(Math.random() * (end_y - start_y + 1) + start_y);
-        
-        this.food = new Cell('Food', this.cell_size, x, y);
-        this.drawSnake();     
-        this.drawFood();   
+        this.generateFood();
+        this.drawFood();
+        this.drawSnake();  
+        this.ate = false;   //Keep track when snake eats food
     }
+    //Draw snake on board according to each cell's coordinates array
     drawSnake(){
         document.querySelector('.board').innerHTML = '';
         let cell, div;
@@ -109,6 +110,28 @@ class Game extends Config{
             document.querySelector('.board').appendChild(div);
         }  
     }
+    //Generate food correct coordinates. It shouldn't match to snake's any cell
+    generateFood(){
+        let end_x = this.board_width / this.cell_size;
+        let end_y = this.board_height / this.cell_size;
+        let x = this.board_x + (Math.floor(Math.random() * (end_x - 1)) + 1) * this.cell_size;
+        let y = this.board_y + (Math.floor(Math.random() * (end_y - 1)) + 1) * this.cell_size;
+        this.food = new Cell('Food', this.cell_size, x, y);
+        while(!this.validFoodCoordinate()){
+            this.generateFood();
+        }
+    }
+    //Check whether food overlaps with snake
+    validFoodCoordinate(){
+        for(let i = 0; i < this.snake.body_length; i++){
+            let cell = this.snake.getCell(i);
+            if(cell.getX() === this.food.getX() && cell.getY() === this.food.getY()){
+                return false;
+            }
+        }
+        return true;
+    }
+    //Draw food according to its coordinates
     drawFood(){
         let div = document.createElement('div');
         div.className = 'food';
@@ -116,16 +139,29 @@ class Game extends Config{
         div.style.top = this.food.getY() + "px";
         document.querySelector('.container').appendChild(div);
     }
+    //After snake eats food food coordinates shold be changed(Re-appear at new place)
+    changeFoodCoordinate(){
+        document.querySelector('.food').style.left = this.food.getX() + "px";
+        document.querySelector('.food').style.top = this.food.getY() + "px";
+    }
+    //Snake movement
     moveSnake(){
-        //Move Part
+        let last_cell_x = this.snake.getBack().getX();
+        let last_cell_y = this.snake.getBack().getY();
+        //Move Part - update current cell's coordinate accordin to its' front neighbour
         for(let i = this.snake.getLength() - 1; i > 0; i--){
             let current_cell = this.snake.getBody()[i];
             let next_cell = this.snake.getBody()[i - 1];
             current_cell.setX(next_cell.getX());
             current_cell.setY(next_cell.getY());
         }
-        //Move Head
         this.moveHead(this.snake.getBody()[0]);
+        //Add cell at the end of body
+        if(this.ate){
+            let new_cell = new Cell("Body", this.cell_size, last_cell_x,  last_cell_y);
+            this.snake.grow(new_cell);
+            this.ate = false;
+        }
     }
     moveHead(head){
         if(this.snake.direction === 'Up'){
@@ -141,7 +177,6 @@ class Game extends Config{
     checkBounds(){
         this.checkWalls();
         this.checkCollision();
-        
     }
     checkWalls(){
         let head = this.snake.getHead();
@@ -155,32 +190,28 @@ class Game extends Config{
             head.setX(this.board_x + this.board_width - head.getSize());
         }
     }
+    //Check if head collides with body
     checkCollision(){
         let head = this.snake.getHead();
         let cell;
-        // console.log('Head - ',head.getX(), head.getY());
         for(let i = this.snake.getLength() - 1; i > 0; i--){
             cell = this.snake.getCell(i);
-           // console.log('Cell ', cell.getX(), cell.getY());
-            
             if(head.getX() === cell.getX() && head.getY() === cell.getY()){
-                console.log('Collision');
                 this.finishRound(); 
             }
         }
     }   
+    checkFoodEat(){
+        let head = this.snake.getHead();
+        if(head.getX() === this.food.getX() && head.getY() === this.food.getY()){
+            this.ate = true;
+            this.generateFood();
+            this.changeFoodCoordinate();
+        }
+    }
     finishRound(){
-        
         clearInterval(this.interval);
         alert('End');
-        document.querySelector('.board').innerHTML = '';
-        console.log(document.querySelector('.board').innerHTML);
-
-        
-        document.querySelector('.board').style.backgroundColor = 'white';
-        
-        
-        
     }
     start(){
         this.interval = setInterval(this.runRound.bind(this), this.speed);
@@ -188,6 +219,7 @@ class Game extends Config{
     runRound(){
         this.moveSnake(); 
         this.checkBounds();
+        this.checkFoodEat();
         this.drawSnake();
     }
 }
@@ -196,18 +228,18 @@ let config =
 {
     board_x: document.querySelector('.board').offsetLeft,
     board_y: document.querySelector('.board').offsetTop,
-    board_width: 600,
-    board_height: 600,
+    board_width: 500,
+    board_height: 500,
     cell_size: 20, 
     snake_start_length:4, 
     snake_x: document.querySelector('.board').offsetLeft + 3 * 20, 
-    snake_y: document.querySelector('.board').offsetTop, 
+    snake_y: 50, 
     start_direction: 'Right',
-    speed: 200
+    speed: 100
 }
 
 let game = new Game(config);
-//Need bind, otherwise 'this' in runGame is 'window' instead of 'Game
-// var interval = setInterval(game.runGame.bind(game), 500);
 game.start();
+
+
 
