@@ -96,6 +96,7 @@ class Game extends Config{
         this.drawFood();
         this.drawSnake();  
         this.ate = false;   //Keep track when snake eats food
+        this.score = 0;
     }
     //Draw snake on board according to each cell's coordinates array
     drawSnake(){
@@ -161,6 +162,7 @@ class Game extends Config{
             let new_cell = new Cell("Body", this.cell_size, last_cell_x,  last_cell_y);
             this.snake.grow(new_cell);
             this.ate = false;
+            this.score += 1;
         }
     }
     moveHead(head){
@@ -198,6 +200,7 @@ class Game extends Config{
             cell = this.snake.getCell(i);
             if(head.getX() === cell.getX() && head.getY() === cell.getY()){
                 this.finishRound(); 
+                break;
             }
         }
     }   
@@ -211,7 +214,18 @@ class Game extends Config{
     }
     finishRound(){
         clearInterval(this.interval);
-        alert('End');
+        alert('Your Score is: ' + this.score);
+        this.reset();
+        this.start();
+    }
+    reset(){
+        document.querySelector('.food').remove();
+        this.score = 0;
+        this.snake = new Snake(this.snake_x, this.snake_y, this.cell_size, this.snake_start_length, this.start_direction);
+        this.generateFood();
+        this.drawFood();
+        this.drawSnake();  
+        this.ate = false;   //Keep track when snake eats food
     }
     start(){
         this.interval = setInterval(this.runRound.bind(this), this.speed);
@@ -235,7 +249,7 @@ let config =
     snake_x: document.querySelector('.board').offsetLeft + 3 * 20, 
     snake_y: 50, 
     start_direction: 'Right',
-    speed: 100
+    speed: 50
 }
 
 let game = new Game(config);
