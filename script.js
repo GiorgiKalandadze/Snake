@@ -97,6 +97,7 @@ class Game extends Config{
         this.drawSnake();  
         this.ate = false;   //Keep track when snake eats food
         this.score = 0;
+        this.clicked = this.start_direction;
     }
     //Draw snake on board according to each cell's coordinates array
     drawSnake(){
@@ -166,6 +167,10 @@ class Game extends Config{
         }
     }
     moveHead(head){
+        /* 
+            There could be multiple clicks in interval, that's why we keep only one of them.
+        */
+        this.snake.direction = this.clicked;
         if(this.snake.direction === 'Up'){
             head.y -= this.cell_size;
         } else if(this.snake.direction === 'Right'){
@@ -249,7 +254,7 @@ let config =
     snake_x: document.querySelector('.board').offsetLeft + 3 * 20, 
     snake_y: 50, 
     start_direction: 'Right',
-    speed: 50
+    speed: 100
 }
 
 let game = new Game(config);
